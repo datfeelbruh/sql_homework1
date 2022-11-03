@@ -1,0 +1,98 @@
+--1. Создать таблицу отдел(department), колонки: id, name, isProfit(приносит прибыль - да/нет)--
+
+CREATE TABLE department (
+	id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name varchar(255),
+	isProfit boolean
+);
+
+--2. Вставить туда:
+Бухгалтерия, нет
+Кредитный отдел, да
+Отдел продаж, да
+Правление, нет--
+
+INSERT INTO department (name, isProfit)
+VALUES 
+('Бухгалтерия', false),
+('Кредитный отдел', true),
+('Отдел продаж', true),
+('Правление', false)
+
+--3. Создать таблицу работник(employee), колонки: id, full_name (фио), salary, department_id (связь с отделом)--
+
+CREATE TABLE employee (
+	id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	full_name varchar(255),
+	salary integer,
+	department_id bigint REFERENCES department(id)
+);
+
+--4. Вставить в таблицу работник:
+Петров Иван, 30000, отдел продаж(подумать, какое значение нужно вставлять)
+Иванова Наталья, 50000, Бухгалтерия
+Мирских Петр, 100000, Правление
+Улюкаев Владимир, 200000, Правление
+Заморский Виктор, 70000, Кредитный Отдел--
+
+INSERT INTO employee (full_name, salary, department_id)
+VALUES
+('Петров Иван', 30000, 3),
+('Иванова Наталья', 50000, 1),
+('Мирских Петр', 100000, 4),
+('Улюкаев Владимир', 200000, 4),
+('Заморский Виктор', 70000, 2)
+
+--5. Вывести на экран всех сотрудников Правления - вывод: все поля employee--
+
+SELECT * FROM employee WHERE department_id = 4;
+
+--6. Вывести на экран сумму всех зарплат сотрудников - вывод: общая сумма всех зарплат--
+
+SELECT SUM(salary) AS total_salary FROM employee;
+
+--7. Вывести на экран фио сотрудника, является ли он сотрудником прибыльного отдела - вывод: фио, принадлежит к прибыльному отделу--
+
+SELECT full_name, department.isProfit AS profit_department
+FROM employee 
+JOIN department
+ON employee.department_id = department.id
+WHERE department.isProfit = true;
+
+--8. Вывести на экран только тех сотрудников, которые получают от 10_000 до 100_000 (включительно) - вывод: все поля employee--
+
+SELECT *
+FROM employee
+WHERE salary BETWEEN 10000 AND 100000;
+
+--9. Удалить Мирского Петра из таблицы --
+
+DELETE FROM employee WHERE full_name = 'Мирских Петр';
+
+--10. Поменять название Кредитного отдела на депозитный и поменять у него статус "приносит прибыль" на нет--
+
+UPDATE department
+SET
+name = 'Депозитный отдел',
+isProfit = 'false'
+WHERE
+name = 'Кредитный отдел';
+
+--11. Вывести всех сотрудников содержащих "иван" (в независимости от регистра) - вывод: все поля employee--
+
+SELECT full_name
+FROM employee
+WHERE LOWER(full_name)
+LIKE '%иван';
+
+--12. Вывести среднюю зарплату по отделам - вывод: отдел, средняя зарплата--
+
+SELECT d.name AS d_name, AVG(e.salary) AS avg_salary
+FROM employee AS e
+JOIN department AS d
+ON e.department_id = d.id
+GROUP BY d.name;
+
+--13.Удалить таблицы employee, department--
+
+DROP TABLE department, employee;
